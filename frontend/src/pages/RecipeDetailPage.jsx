@@ -7,7 +7,7 @@ function RecipeDetailPage() {
   const [recipe, setRecipe] = useState(null); // null = not loaded yet
 
   useEffect(() => {
-    fetch("http://localhost:5000/api/recipes/" + id)
+    fetch("/api/recipes/" + id)
       .then((res) => res.json())
       .then((data) => setRecipe(data))
       .catch((err) => console.log(err));
@@ -15,7 +15,7 @@ function RecipeDetailPage() {
 
   async function handleDelete() {
     if (!window.confirm("Delete this recipe?")) return;
-    await fetch("http://localhost:5000/api/recipes/" + id, { method: "DELETE" });
+    await fetch("/api/recipes/" + id, { method: "DELETE" });
     navigate("/"); // go back to the list afterwards
   }
 

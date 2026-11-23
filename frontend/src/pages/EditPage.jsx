@@ -9,14 +9,14 @@ function EditPage() {
 
   // Load the existing recipe so the form can start with its values
   useEffect(() => {
-    fetch("http://localhost:5000/api/recipes/" + id)
+    fetch("/api/recipes/" + id)
       .then((res) => res.json())
       .then((data) => setRecipe(data))
       .catch((err) => console.log(err));
   }, [id]);
 
   async function handleUpdate(recipeData) {
-    await fetch("http://localhost:5000/api/recipes/" + id, {
+    await fetch("/api/recipes/" + id, {
       method: "PUT",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify(recipeData),

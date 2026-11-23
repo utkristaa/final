@@ -6,7 +6,7 @@ function CreatePage() {
 
   // Runs when RecipeForm calls onSave(...) with the form data
   async function handleCreate(recipeData) {
-    await fetch("http://localhost:5000/api/recipes", {
+    await fetch("/api/recipes", {
       method: "POST",
       headers: { "Content-Type": "application/json" }, // tells Express we send JSON
       body: JSON.stringify(recipeData),                // objects must become text

@@ -7,7 +7,7 @@ function HomePage() {
 
   // useEffect with [] runs ONCE after the first render (to load data)
   useEffect(() => {
-    fetch("http://localhost:5000/api/recipes")
+    fetch("/api/recipes")
       .then((res) => res.json())
       .then((data) => {
         setRecipes(data);     // saving into state makes React re-render

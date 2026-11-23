@@ -13,6 +13,15 @@ HOW TO RUN
 3. Terminal 2:  cd frontend ->  npm install  ->  npm run dev   (port 5173)
 4. Open http://localhost:5173
 
+DEPLOY TO AMAZON LINUX
+----------------------
+Push this repository to GitHub, then on the EC2 instance run
+`sudo bash ./deploy-recipe-book.sh` from the recipe-book project directory.
+The script builds the frontend, runs the API as a systemd service, configures
+Nginx for the SPA and `/api`, and prompts for a MongoDB URI using the
+`recipebook` database. Allow inbound HTTP (port 80) in the instance security
+group. The URI is stored in `/etc/recipe-book.env`, not in the repository.
+
 1. BACKEND FILES
 ----------------
 db.js              Connects to MongoDB with Mongoose. Own file so the
