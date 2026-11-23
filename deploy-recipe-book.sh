@@ -3,7 +3,7 @@ set -Eeuo pipefail
 
 REPO_URL="https://github.com/utkrista700/recipe-book.git"
 APP_DIR="/opt/recipe-book"
-PROJECT_DIR="$APP_DIR/recipe-book"
+PROJECT_DIR="$APP_DIR"
 WEB_DIR="/var/www/recipe-book"
 ENV_FILE="/etc/recipe-book.env"
 SERVICE_NAME="recipe-book-api"
