@@ -1,0 +1,117 @@
+RECIPE BOOK - STUDY NOTES
+=========================
+(Chapter names below refer to the topics in your React study guide; I could not
+see the PDF itself, so match them to your own chapter numbers.)
+
+HOW TO RUN
+----------
+1. Start the local MongoDB server. The backend connects to
+   mongodb://127.0.0.1:27017/recipebook by default.
+   For Atlas, set MONGO_URI in the backend process environment (no .env file
+   is loaded).
+2. Terminal 1:  cd backend  ->  npm install  ->  npm run dev   (port 5000)
+3. Terminal 2:  cd frontend ->  npm install  ->  npm run dev   (port 5173)
+4. Open http://localhost:5173
+
+DEPLOY TO AMAZON LINUX
+----------------------
+Push this repository to GitHub, then on the EC2 instance run
+`sudo bash ./deploy-recipe-book.sh` from the recipe-book project directory.
+The script builds the frontend, runs the API as a systemd service, configures
+Nginx for the SPA and `/api`, and prompts for a MongoDB URI using the
+`recipebook` database. Allow inbound HTTP (port 80) in the instance security
+group. The URI is stored in `/etc/recipe-book.env`, not in the repository.
+
+1. BACKEND FILES
+----------------
+db.js              Connects to MongoDB with Mongoose. Own file so the
+                   connection is easy to find. Quits if connection fails.
+models/Recipe.js   The schema: title, author, ingredients, instructions,
+                   createdAt. "required: true" makes MongoDB reject empty data.
+routes/recipeRoutes.js
+                   The five CRUD routes. Kept separate from server.js so each
+                   file does one job.
+server.js          Starts Express, turns on cors() (frontend and backend run on
+                   different ports, browsers block that without CORS), turns on
+                   express.json() (so req.body works), mounts the routes at
+                   /api/recipes, connects the DB, listens on PORT.
+
+2. FRONTEND FILES
+-----------------
+main.jsx           Entry point. Wraps <App /> in <BrowserRouter> (Routing chapter).
+App.jsx            Holds <Navbar /> and <Routes>/<Route>. Every page is a Route.
+                   Dynamic routes: /recipe/:id and /edit/:id.
+components/Navbar.jsx      <NavLink> links. NavLink adds class "active" itself.
+components/RecipeCard.jsx  One card. Receives a recipe through PROPS
+                           (destructured: { recipe }). useNavigate() on click.
+components/RecipeForm.jsx  Reusable form. Controlled inputs: value={title} +
+                           onChange={(e) => setTitle(e.target.value)}.
+                           One useState per field. onSubmit with e.preventDefault().
+pages/HomePage.jsx         useState + useEffect + fetch to load all recipes,
+                           ternaries for loading/empty/list, .map() with
+                           key={recipe._id}.
+pages/RecipeDetailPage.jsx useParams() to read :id, fetch one recipe, delete button.
+pages/CreatePage.jsx       Wraps RecipeForm, sends POST, then navigate("/").
+pages/EditPage.jsx         Loads the recipe, passes values into RecipeForm as
+                           props, sends PUT, then navigates to detail page.
+styles.css                 The only stylesheet; className (not class) in JSX.
+
+3. CONCEPTS TIED TO THE GUIDE
+-----------------------------
+JSX            Every component returns ONE root element. {} runs JavaScript,
+               e.g. {recipe.title}. Use className, not class.
+Components     Capitalised names, one per file, "export default" / "import".
+Props          Parent -> child only. <RecipeCard recipe={recipe} /> : string
+               props use quotes, everything else uses { }.
+.map() + key   recipes.map(r => <RecipeCard key={r._id} recipe={r} />). The key
+               must be unique and stable, so we use MongoDB's _id, not the index.
+useState       Remembers values between renders. Changing state re-renders.
+Events         onClick, onChange, onSubmit. Pass the function, do not call it:
+               onClick={handleDelete} not onClick={handleDelete()}.
+Controlled     The input shows what is in state and updates state on every key
+forms          press, so React is the single source of truth.
+Routing        BrowserRouter (main.jsx), Routes/Route (App.jsx), NavLink,
+               useNavigate (redirect after saving), useParams (read :id).
+Conditional    {loading ? <p>Loading...</p> : <List />}
+rendering
+useEffect +    useEffect(() => { fetch(...).then(...) }, []) - the [] means
+fetch          "run once when the page appears". (Marked "not yet covered" in
+               the guide, so it is the only new idea here.)
+
+4. DATA FLOW: FORM -> BACKEND -> MONGODB -> UI
+----------------------------------------------
+User types -> useState updates -> Submit -> RecipeForm calls onSave(data) ->
+CreatePage fetch POST -> Express route -> Recipe.create() -> saved in MongoDB ->
+Express replies with the new recipe -> navigate("/") -> HomePage mounts ->
+useEffect fetches GET -> setRecipes -> React re-renders the cards.
+
+5. REQUEST / RESPONSE FOR EACH CRUD OPERATION
+---------------------------------------------
+CREATE  POST   /api/recipes      body = JSON recipe          -> 201 + new recipe
+READ    GET    /api/recipes                                  -> 200 + array
+READ 1  GET    /api/recipes/:id                              -> 200 + one recipe (404 if missing)
+UPDATE  PUT    /api/recipes/:id  body = changed fields       -> 200 + updated recipe
+DELETE  DELETE /api/recipes/:id                              -> 200 + message
+
+6. COMMON MISTAKES TO AVOID
+---------------------------
+- Using class instead of className.
+- Returning two elements side by side (need one root element).
+- Forgetting key on .map() items, or using the index as the key.
+- Calling the handler: onClick={fn()} instead of onClick={fn}.
+- Changing state directly (recipes.push(x)) instead of using the setter.
+- Forgetting e.preventDefault() in onSubmit (page reloads, data lost).
+- Input with value= but no onChange (it becomes frozen).
+- Forgetting export default or a capital letter in the component name.
+- Forgetting the [] in useEffect (infinite fetch loop).
+- Forgetting cors() or express.json() in the backend.
+- Forgetting headers + JSON.stringify when sending data with fetch.
+
+7. TRY THIS YOURSELF
+--------------------
+1. Add a "cookingTime" field (schema, form, card, detail page).
+2. Add a search input on HomePage that filters recipes by title (new useState).
+3. Show "Recipe saved!" for a moment after creating one.
+4. Add a 404 <Route path="*"> page.
+5. Replace fetch with Axios in one page.
+6. Show an error message in the UI when the fetch fails.
